@@ -45,7 +45,7 @@ const saveAs = (data, filename) => {
   const url = window.URL.createObjectURL(data);
   const a = document.createElement('a');
   // Set the <a> tag attributes to allow a file download
-  a.download = filename || "NEMO";
+  a.download = filename || "untitled";
   // Add the data uri
   a.href = url;
   a.style.display = "none";
