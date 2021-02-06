@@ -48,7 +48,7 @@ const saveAs = (data, filename) => {
   a.download = filename || "NEMO";
   // Add the data uri
   a.href = url;
-  a.style["display"] = "none";
+  a.style.display = "none";
   // Then append the hidden <a> tag to the body and click it to open a save dialog box
   document.body.appendChild(a);
   a.click();
