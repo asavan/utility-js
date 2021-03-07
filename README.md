@@ -21,7 +21,7 @@ worker.postMessage("PING");
 ## saveAs
 ```javascript
 // Creates a file save prompt for a given input
-const saveAs = (data, filename) => {
+const saveAs = (data, filename = "untitled") => {
   switch (typeof data) {
     case "undefined":
       throw Error("No data or variable is not yet initialized");
@@ -67,7 +67,7 @@ const saveAs = (data, filename) => {
   const url = window.URL.createObjectURL(data);
   const a = document.createElement('a');
   // Set the <a> tag attributes to allow a file download
-  a.download = filename || "untitled";
+  a.download = filename;
   // Add the data uri
   a.href = url;
   a.style.display = "none";
