@@ -81,6 +81,7 @@ const saveAs = (data, filename = "untitled") => {
 ```
 
 ## Encrypt / Decrypt
+```javascript
 // Provides two functions to encrypt or decrypt a payload with a password
 const getPasswordKey = (password) =>
   window.crypto.subtle.importKey("raw", (new TextEncoder()).encode(password), "PBKDF2", false, ["deriveKey"]);
@@ -151,3 +152,4 @@ const decryptData = async (encryptedData, password) => {
 
 const encrypt = async data => await encryptData(data, window.prompt("Password / Passphrase"));
 const decrypt = async data =>  await decryptData(data, window.prompt("Password / Passphrase")) || "Incorrect password/passphrase";
+```
