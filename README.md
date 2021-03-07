@@ -79,3 +79,75 @@ const saveAs = (data, filename = "untitled") => {
   window.URL.revokeObjectURL(url);
 };
 ```
+
+## Encrypt / Decrypt
+// Provides two functions to encrypt or decrypt a payload with a password
+const getPasswordKey = (password) =>
+  window.crypto.subtle.importKey("raw", (new TextEncoder()).encode(password), "PBKDF2", false, ["deriveKey"]);
+const deriveKey = (passwordKey, salt, keyUsage) =>
+  window.crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: salt,
+      iterations: 696969, // We set a really high number of iterations to protect from brute-force attacks, may be considered excessive in amount (100-250k is okay)
+      hash: "SHA-256",
+    },
+    passwordKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    keyUsage
+  );
+
+ const encryptData = async (secretData, password) => {
+  try {
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const passwordKey = await getPasswordKey(password);
+    const aesKey = await deriveKey(passwordKey, salt, ["encrypt"]);
+    const encryptedContent = await window.crypto.subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv: iv,
+      },
+      aesKey,
+      (new TextEncoder()).encode(secretData)
+    );
+
+    const encryptedContentArr = new Uint8Array(encryptedContent);
+    let buff = new Uint8Array(
+      salt.byteLength + iv.byteLength + encryptedContentArr.byteLength
+    );
+    buff.set(salt, 0);
+    buff.set(iv, salt.byteLength);
+    buff.set(encryptedContentArr, salt.byteLength + iv.byteLength);
+    return btoa(String.fromCharCode.apply(null, buff));
+  } catch (e) {
+    console.log(`Error - ${e}`);
+    return "";
+  }
+}
+const decryptData = async (encryptedData, password) => {
+  try {
+    const encryptedDataBuff = Uint8Array.from(atob(encryptedData), (c) => c.charCodeAt(null));
+    const salt = encryptedDataBuff.slice(0, 16);
+    const iv = encryptedDataBuff.slice(16, 28); // 16 + 12
+    const data = encryptedDataBuff.slice(28); // 16 + 12
+    const passwordKey = await getPasswordKey(password);
+    const aesKey = await deriveKey(passwordKey, salt, ["decrypt"]);
+    const decryptedContent = await window.crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: iv,
+      },
+      aesKey,
+      data
+    );
+    return (new TextDecoder()).decode(decryptedContent);
+  } catch (e) {
+    console.log(`Error - ${e}`);
+    return "";
+  }
+}
+
+const encrypt = async data => await encryptData(data, window.prompt("Password / Passphrase"));
+const decrypt = async data =>  await decryptData(data, window.prompt("Password / Passphrase")) || "Incorrect password/passphrase";
