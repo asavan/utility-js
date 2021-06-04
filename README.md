@@ -4,7 +4,7 @@ An assortment of helpful Javascript functions
 ## makeWorker
 ```javascript
 // Turns a given function into a WebWorker object
-const makeWorker = fn => new Worker(URL.createObjectURL(new Blob([fn.toString().replace(/\t|(^[a-z ]*\(\) ?{\r?\n?)|(^\w* \w*? ?= ?\(?\w*?,?\w*?\) ?=> ?{\r?\n?)|( *\r?\n?}$)/g, "")])));
+const makeWorker = fn => new Worker(URL.createObjectURL(new Blob([fn.toString().replace(/\t|(^[a-z ]*\(\) ?{\r?\n?)|(^\w* \w*? ?= ?\(?\w*?,?\w*?\) ?=> ?{\r?\n?)|( *\r?\n?};?$)/g, "")])));
 
 // Example function to return "PONG" when a message of "PING" is received from the main thread
 const work = () => {
