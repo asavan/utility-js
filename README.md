@@ -2,6 +2,7 @@
 An assortment of helpful Javascript functions
 
 ## makeWorker
+### Create a WebWorker from an existing function. Used to offload CPU-expensive functions from the main thread.
 ```javascript
 // Turns a given function's content into a WebWorker object. Only function without arguments can be converted
 const makeWorker = fn => new Worker(URL.createObjectURL(new Blob([fn.toString().replace(/\t|(^[a-z ]*\(\) ?{\r?\n?)|(^(\w*? )?(\w*? )?(= )?\(?\w*?,?\w*?\)? ?=> ?{\r?\n?)|(\r?\n?};?$)/g, "")])));
@@ -19,6 +20,7 @@ worker.postMessage("PING");
 ```
 
 ## saveAs
+### Save arbitrary data as a file of your choice
 ```javascript
 // Creates a file save prompt for a given input
 const saveAs = (data, filename = "untitled") => {
@@ -81,6 +83,7 @@ const saveAs = (data, filename = "untitled") => {
 ```
 
 ## Encrypt / Decrypt
+### Simple implementation of (en/de)cryption functions for the browser. PBKDF2 was chosen as it is purposefully slow in order to reduce attack time when trying to bruteforce the encryption password.
 ```javascript
 // Provides two functions to encrypt or decrypt a payload with a password
 const getPasswordKey = (password) =>
@@ -152,4 +155,46 @@ const decryptData = async (encryptedData, password) => {
 
 const encrypt = async data => await encryptData(data, window.prompt("Password / Passphrase"));
 const decrypt = async data =>  await decryptData(data, window.prompt("Password / Passphrase")) || "Incorrect password/passphrase";
+```
+
+## sleep
+### Javascript-based implementation of the sleep() function
+```javascript
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+```
+
+## $make
+### Helper function to create a DOM element with optional properties, attributes, child elements, and event listeners.
+```javascript
+const $make = (tag, properties, attributes, children, eventListeners) => {
+	const $element = document.createElement(tag);
+	if (children) {
+		if (children instanceof Array && children.length > 0) {
+			$element.append(...children);
+		} else if (children instanceof Element) {
+			$element.append(children);
+		} else if (typeof children === "string") {
+			$element.innerHTML = children;
+		}
+	}
+	for (const property in properties) {
+		if (typeof properties[property] === "object") {
+			Object.assign($element[property], properties[property]);
+		} else {
+			$element[property] = properties[property];
+		}
+	}
+	for (const attribute in attributes) $element.setAttribute(attribute, attributes[attribute]);
+	if (eventListeners) {
+		if (eventListeners instanceof Array && eventListeners.length > 0) {
+			eventListeners.forEach(({event, function: fn, options}) => {
+				$element.addEventListener(event, fn, options);
+			});
+		} else if (eventListeners instanceof Object && Object.keys(eventListeners).length > 0) {
+			const { event, function: fn, options } = eventListeners;
+			$element.addEventListener(event, fn, options);
+		}
+	}
+	return $element;
+};
 ```
